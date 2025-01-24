@@ -105,8 +105,12 @@ namespace VideoToTexture.Components
                 elapsedTime += gameTime;
 
                 if (elapsedTime >= targetInterval)
-                {
-                    elapsedTime -= targetInterval;
+                {               
+                    while(elapsedTime >= targetInterval)
+                    {
+                        elapsedTime-= targetInterval;
+                    }
+
                     if (this.videoStreamDecoder.TryDecodeNextFrame(out var frame, this.Loop))
                     {
                         this.frameNumber++;

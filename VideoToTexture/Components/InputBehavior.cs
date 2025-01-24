@@ -26,7 +26,7 @@ namespace VideoToTexture.Components
             {
                 this.videoPlayer.Play(true);
             }
-            else if (keyboardDispatcher.ReadKeyState(Keys.S) == ButtonState.Pressed)
+            else if (keyboardDispatcher.ReadKeyState(Keys.O) == ButtonState.Pressed)
             {
                 this.videoPlayer.Stop();
             }
