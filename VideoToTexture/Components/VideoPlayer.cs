@@ -13,12 +13,105 @@ namespace VideoToTexture.Components
 {
     public class VideoPlayer : Behavior
     {
+        public enum DeviceType
+        {
+            NONE,
+            VDPAU,
+            CUDA,
+            VAAPI,
+            DXVA2,
+            QSV,
+            VIDEOTOOLBOX,
+            D3D11VA,
+            DRM,
+            OPENCL,
+            MEDIACODEC,
+            VULKAN
+        }
+
         [BindService]
-        private GraphicsContext graphicsContext;
+        private GraphicsContext graphicsContext = null;
 
         [BindComponent]
         private MaterialComponent materialComponent = null;
 
+        public DeviceType HWDevice
+        {
+            get
+            {
+                switch (this.hwDevice)
+                {
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_VDPAU:
+                        return DeviceType.VDPAU;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_CUDA:
+                        return DeviceType.CUDA;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_VAAPI:
+                        return DeviceType.VAAPI;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_DXVA2:
+                        return DeviceType.DXVA2;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_QSV:
+                        return DeviceType.QSV;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_VIDEOTOOLBOX:
+                        return DeviceType.VIDEOTOOLBOX;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA:
+                        return DeviceType.D3D11VA;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_DRM:
+                        return DeviceType.DRM;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_OPENCL:
+                        return DeviceType.OPENCL;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC:
+                        return DeviceType.MEDIACODEC;
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_VULKAN:
+                        return DeviceType.VULKAN;   
+                    case AVHWDeviceType.AV_HWDEVICE_TYPE_NONE:
+                    default:
+                        return DeviceType.NONE;                        
+                }
+            }
+
+            set
+            {
+                switch (value)
+                {
+                    case DeviceType.NONE:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
+                        break;
+                    case DeviceType.VDPAU:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_VDPAU;
+                        break;
+                    case DeviceType.CUDA:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_CUDA;
+                        break;
+                    case DeviceType.VAAPI:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_VAAPI;
+                        break;
+                    case DeviceType.DXVA2:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_DXVA2;
+                        break;
+                    case DeviceType.QSV:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_QSV;
+                        break;
+                    case DeviceType.VIDEOTOOLBOX:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_VIDEOTOOLBOX;
+                        break;
+                    case DeviceType.D3D11VA:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA;
+                        break;
+                    case DeviceType.DRM:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_DRM;
+                        break;
+                    case DeviceType.OPENCL:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_OPENCL;
+                        break;
+                    case DeviceType.MEDIACODEC:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC;
+                        break;
+                    case DeviceType.VULKAN:
+                        this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_VULKAN;
+                        break;                    
+                }
+            }
+        }
         public string VideoPath { get; set; }
 
         public bool Autoplay { get; set; }
@@ -26,10 +119,10 @@ namespace VideoToTexture.Components
         public bool Loop { get; set; }
 
         private Texture screenTexture;
-        
+
+        private AVHWDeviceType hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_DXVA2;
         private VideoStreamDecoder videoStreamDecoder;
-        private VideoFrameConverter videoFrameConverter;
-        private AVHWDeviceType hwdevice = AVHWDeviceType.AV_HWDEVICE_TYPE_DXVA2;
+        private VideoFrameConverter videoFrameConverter;        
         private int frameNumber;
         private TimeSpan elapsedTime = TimeSpan.Zero;
         private TimeSpan targetInterval;
@@ -63,7 +156,7 @@ namespace VideoToTexture.Components
                 if (this.videoStreamDecoder == null)
                 {
                     string filePath = Path.Combine(Environment.CurrentDirectory, "Content", this.VideoPath);
-                    this.videoStreamDecoder = new VideoStreamDecoder(filePath, this.hwdevice);
+                    this.videoStreamDecoder = new VideoStreamDecoder(filePath, this.hwDevice);
 
                     Debug.WriteLine($"codec name: {this.videoStreamDecoder.CodecName}");
 
@@ -90,9 +183,9 @@ namespace VideoToTexture.Components
                     material.BaseColorTexture = this.screenTexture;
 
                     var sourceSize = this.videoStreamDecoder.FrameSize;
-                    var sourcePixelFormat = this.hwdevice == AVHWDeviceType.AV_HWDEVICE_TYPE_NONE
+                    var sourcePixelFormat = this.hwDevice == AVHWDeviceType.AV_HWDEVICE_TYPE_NONE
                         ? this.videoStreamDecoder.PixelFormat
-                        : this.GetHWPixelFormat(this.hwdevice);
+                        : this.GetHWPixelFormat(this.hwDevice);
                     var destinationSize = sourceSize;
                     var destinationPixelFormat = AVPixelFormat.AV_PIX_FMT_RGBA;
                     this.videoFrameConverter = new VideoFrameConverter(sourceSize, sourcePixelFormat, destinationSize, destinationPixelFormat);

@@ -123,14 +123,15 @@ Items:
             OrderBias: 0
             RenderFlags: CastShadows
           - !VideoToTexture.Components.VideoPlayer,VideoToTexture
-            Id: 9442e7d6-1b93-4931-b978-be425b9a385a
+            Id: 73749d04-10bb-43d5-ba22-5d68fe9c737c
             Autoplay: true
+            HWDevice: NONE
             IsEnabled: true
             Loop: true
             UpdateOrder: 0.5
-            VideoPath: Videos/confetti.mp4
+            VideoPath: Videos\occean.wmv
           - !VideoToTexture.Components.InputBehavior,VideoToTexture
-            Id: fe66ba42-406a-45c1-a1a6-aca9eaad9293
+            Id: 3daee5b6-6e73-4aff-8deb-a495493a80e2
             IsEnabled: true
             UpdateOrder: 0.5
         Children: []

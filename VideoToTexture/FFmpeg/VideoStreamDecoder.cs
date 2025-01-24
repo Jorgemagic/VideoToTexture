@@ -57,7 +57,14 @@ public sealed unsafe class VideoStreamDecoder : IDisposable
             if (_pFormatContext != null)
             {
                 var frameRate = _pFormatContext->streams[0]->avg_frame_rate;
-                return (float)frameRate.num / (float)frameRate.den;
+                if (frameRate.den > 0)
+                {
+                    return (float)frameRate.num / (float)frameRate.den;
+                }
+                else
+                {
+                    return 30.0f;
+                }
             }
             return -1;
         }
