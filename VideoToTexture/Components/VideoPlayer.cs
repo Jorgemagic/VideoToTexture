@@ -21,6 +21,10 @@ namespace VideoToTexture.Components
 
         public string VideoPath { get; set; }
 
+        public bool Autoplay { get; set; }
+
+        public bool Loop { get; set; }
+
         private Texture screenTexture;
         
         private VideoStreamDecoder videoStreamDecoder;
@@ -29,6 +33,8 @@ namespace VideoToTexture.Components
         private int frameNumber;
         private TimeSpan elapsedTime = TimeSpan.Zero;
         private TimeSpan targetInterval;
+
+        private bool playing = false;
 
         protected override bool OnAttached()
         {
@@ -45,69 +51,94 @@ namespace VideoToTexture.Components
                 Debug.WriteLine($"LIBAVFORMAT Version: {ffmpeg.LIBAVFORMAT_VERSION_MAJOR}.{ffmpeg.LIBAVFORMAT_VERSION_MINOR}");
             }
 
+            this.playing = this.Autoplay;
+
             return result;
         }
 
         protected unsafe override void Update(TimeSpan gameTime)
         {
-            if (this.videoStreamDecoder == null)
+            if (this.playing)
             {
-                string filePath = Path.Combine(Environment.CurrentDirectory, "Content", this.VideoPath);
-                this.videoStreamDecoder = new VideoStreamDecoder(filePath, this.hwdevice);
-
-                Debug.WriteLine($"codec name: {this.videoStreamDecoder.CodecName}");
-
-                var info = this.videoStreamDecoder.GetContextInfo();
-                info.ToList().ForEach(x => Debug.WriteLine($"{x.Key} = {x.Value}"));
-
-                StandardMaterial material = new StandardMaterial(this.materialComponent.Material);
-                var textureDesc = new TextureDescription()
+                if (this.videoStreamDecoder == null)
                 {
-                    Type = TextureType.Texture2D,
-                    Width = (uint)this.videoStreamDecoder.FrameSize.Width,
-                    Height = (uint)this.videoStreamDecoder.FrameSize.Height,
-                    Depth = 1,
-                    ArraySize = 1,
-                    Faces = 1,
-                    Usage = ResourceUsage.Default,
-                    CpuAccess = ResourceCpuAccess.None,
-                    Flags = TextureFlags.ShaderResource,
-                    Format = PixelFormat.R8G8B8A8_UNorm,
-                    MipLevels = (uint)1,
-                    SampleCount = TextureSampleCount.None,
-                };
-                this.screenTexture = graphicsContext.Factory.CreateTexture(ref textureDesc);
-                material.BaseColorTexture = this.screenTexture;
+                    string filePath = Path.Combine(Environment.CurrentDirectory, "Content", this.VideoPath);
+                    this.videoStreamDecoder = new VideoStreamDecoder(filePath, this.hwdevice);
 
-                var sourceSize = this.videoStreamDecoder.FrameSize;
-                var sourcePixelFormat = this.hwdevice == AVHWDeviceType.AV_HWDEVICE_TYPE_NONE
-                    ? this.videoStreamDecoder.PixelFormat
-                    : this.GetHWPixelFormat(this.hwdevice);
-                var destinationSize = sourceSize;
-                var destinationPixelFormat = AVPixelFormat.AV_PIX_FMT_RGBA;
-                this.videoFrameConverter = new VideoFrameConverter(sourceSize, sourcePixelFormat, destinationSize, destinationPixelFormat);
+                    Debug.WriteLine($"codec name: {this.videoStreamDecoder.CodecName}");
 
-                this.frameNumber = 0;
-                var fps = this.videoStreamDecoder.FrameRate;
-                this.targetInterval = TimeSpan.FromSeconds(1.0f / fps);
-            }
+                    var info = this.videoStreamDecoder.GetContextInfo();
+                    info.ToList().ForEach(x => Debug.WriteLine($"{x.Key} = {x.Value}"));
 
-            elapsedTime += gameTime;
+                    StandardMaterial material = new StandardMaterial(this.materialComponent.Material);
+                    var textureDesc = new TextureDescription()
+                    {
+                        Type = TextureType.Texture2D,
+                        Width = (uint)this.videoStreamDecoder.FrameSize.Width,
+                        Height = (uint)this.videoStreamDecoder.FrameSize.Height,
+                        Depth = 1,
+                        ArraySize = 1,
+                        Faces = 1,
+                        Usage = ResourceUsage.Default,
+                        CpuAccess = ResourceCpuAccess.None,
+                        Flags = TextureFlags.ShaderResource,
+                        Format = PixelFormat.R8G8B8A8_UNorm,
+                        MipLevels = (uint)1,
+                        SampleCount = TextureSampleCount.None,
+                    };
+                    this.screenTexture = graphicsContext.Factory.CreateTexture(ref textureDesc);
+                    material.BaseColorTexture = this.screenTexture;
 
-            if (elapsedTime >= targetInterval)
-            {
-                elapsedTime -= targetInterval;
-                if (this.videoStreamDecoder.TryDecodeNextFrame(out var frame))
+                    var sourceSize = this.videoStreamDecoder.FrameSize;
+                    var sourcePixelFormat = this.hwdevice == AVHWDeviceType.AV_HWDEVICE_TYPE_NONE
+                        ? this.videoStreamDecoder.PixelFormat
+                        : this.GetHWPixelFormat(this.hwdevice);
+                    var destinationSize = sourceSize;
+                    var destinationPixelFormat = AVPixelFormat.AV_PIX_FMT_RGBA;
+                    this.videoFrameConverter = new VideoFrameConverter(sourceSize, sourcePixelFormat, destinationSize, destinationPixelFormat);
+
+                    this.frameNumber = 0;
+                    var fps = this.videoStreamDecoder.FrameRate;
+                    this.targetInterval = TimeSpan.FromSeconds(1.0f / fps);
+                }
+
+                elapsedTime += gameTime;
+
+                if (elapsedTime >= targetInterval)
                 {
-                    this.frameNumber++;
-                    var convertedFrame = this.videoFrameConverter.Convert(frame);
+                    elapsedTime -= targetInterval;
+                    if (this.videoStreamDecoder.TryDecodeNextFrame(out var frame, this.Loop))
+                    {
+                        this.frameNumber++;
+                        var convertedFrame = this.videoFrameConverter.Convert(frame);
 
-                    this.graphicsContext.UpdateTextureData(this.screenTexture,
-                                                           (nint)convertedFrame.data[0],
-                                                           (uint)(convertedFrame.width * convertedFrame.height * 4),
-                                                           0);
+                        this.graphicsContext.UpdateTextureData(this.screenTexture,
+                                                               (nint)convertedFrame.data[0],
+                                                               (uint)(convertedFrame.width * convertedFrame.height * 4),
+                                                               0);
+                    }
                 }
             }
+        }
+
+        public void Play(bool loop = false)
+        {
+            this.playing = true;
+            this.Loop = loop;
+        }
+
+        public void Stop()
+        {
+            if (this.playing)
+            {
+                this.playing = false;
+                this.videoStreamDecoder.Reset();
+            }
+        }
+
+        public void Pause()
+        {
+            this.playing = false;
         }
 
         private AVPixelFormat GetHWPixelFormat(AVHWDeviceType hWDevice)

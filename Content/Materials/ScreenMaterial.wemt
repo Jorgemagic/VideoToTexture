@@ -6,12 +6,12 @@ DefaultProfile:
   Platform: Undefined
 ExportAsRaw: false
 MaterialInfo:
-  Id: f270c9e8-5d64-42dc-9e17-c11fad1a197e
+  Id: f1f628dd-326d-44c1-8d2c-6294720af2d4
   ActiveDirectives:
     - DIFF
   AllowInstancing: false
   EffectID: daa1f60a-82ad-40fc-8fbb-7b85caa6de0a
-  Layer: 8e7317aa-3a55-45c6-82a5-47d333abe272
+  Layer: e35c59a9-26ab-4b4c-8210-4b1f21c31530
   OrderBias: 0
   Parameters:
     - Name: World
@@ -64,7 +64,7 @@ MaterialInfo:
       ValueByteArray: AACAPwAAgD8AAIA/
     - Name: Alpha
       Type: System.Single
-      ValueByteArray: AACAPw==
+      ValueByteArray: ZmZmPw==
     - Name: Metallic
       Type: System.Single
       ValueByteArray: AAAAAA==

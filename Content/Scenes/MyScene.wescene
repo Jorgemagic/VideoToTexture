@@ -124,9 +124,15 @@ Items:
             RenderFlags: CastShadows
           - !VideoToTexture.Components.VideoPlayer,VideoToTexture
             Id: 9442e7d6-1b93-4931-b978-be425b9a385a
+            Autoplay: true
             IsEnabled: true
+            Loop: true
             UpdateOrder: 0.5
             VideoPath: Videos/confetti.mp4
+          - !VideoToTexture.Components.InputBehavior,VideoToTexture
+            Id: fe66ba42-406a-45c1-a1a6-aca9eaad9293
+            IsEnabled: true
+            UpdateOrder: 0.5
         Children: []
         Id: e5a9db83-7bfa-4fc2-a645-4ec8a10ebb9d
     Id: 9841b6b3-9c09-4b60-b442-a5c63257ee02

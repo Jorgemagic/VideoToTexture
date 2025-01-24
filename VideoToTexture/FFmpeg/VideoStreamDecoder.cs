@@ -32,8 +32,8 @@ public sealed unsafe class VideoStreamDecoder : IDisposable
         {
             ffmpeg.av_hwdevice_ctx_create(&_pCodecContext->hw_device_ctx, HWDeviceType, null, null, 0)
                 .ThrowExceptionIfError();
-        }       
-        
+        }
+
         ffmpeg.avcodec_parameters_to_context(_pCodecContext, _pFormatContext->streams[_streamIndex]->codecpar)
             .ThrowExceptionIfError();
         ffmpeg.avcodec_open2(_pCodecContext, codec, null).ThrowExceptionIfError();
@@ -50,7 +50,7 @@ public sealed unsafe class VideoStreamDecoder : IDisposable
     public Size FrameSize { get; }
     public AVPixelFormat PixelFormat { get; }
 
-    public float FrameRate 
+    public float FrameRate
     {
         get
         {
@@ -76,7 +76,7 @@ public sealed unsafe class VideoStreamDecoder : IDisposable
         ffmpeg.avformat_close_input(&pFormatContext);
     }
 
-    public bool TryDecodeNextFrame(out AVFrame frame)
+    public bool TryDecodeNextFrame(out AVFrame frame, bool loop)
     {
         ffmpeg.av_frame_unref(_pFrame);
         ffmpeg.av_frame_unref(_receivedFrame);
@@ -92,9 +92,12 @@ public sealed unsafe class VideoStreamDecoder : IDisposable
                     error = ffmpeg.av_read_frame(_pFormatContext, _pPacket);
 
                     // loop
-                    if (error < 0)
+                    if (loop)
                     {
-                        ffmpeg.av_seek_frame(_pFormatContext, _streamIndex, 0, ffmpeg.AVSEEK_FLAG_BACKWARD);
+                        if (error < 0)
+                        {
+                            this.Reset();
+                        }
                     }
 
                     if (error == ffmpeg.AVERROR_EOF)
@@ -142,5 +145,10 @@ public sealed unsafe class VideoStreamDecoder : IDisposable
         }
 
         return result;
+    }
+
+    public void Reset()
+    {
+        ffmpeg.av_seek_frame(_pFormatContext, _streamIndex, 0, ffmpeg.AVSEEK_FLAG_BACKWARD);
     }
 }
