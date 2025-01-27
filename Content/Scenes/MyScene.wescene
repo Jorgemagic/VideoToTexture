@@ -70,72 +70,7 @@ Items:
         TAU: 1.10000002
         TagFilter: null
         UsePhysicalParameters: false
-    Children:
-      - !Evergine.Framework.Assets.AssetSources.Entities.EntityItemModel,Evergine.Framework
-        Name: screen
-        Tag: Screen
-        IsEnabled: true
-        IsStatic: false
-        Components:
-          - !Evergine.Framework.Graphics.Transform3D,Evergine.Framework
-            Id: 76c12723-bcd8-43f8-a644-6af76b7f33ff
-            IsEnabled: true
-            LocalOrientation:
-              W: 0.707106769
-              X: 0.707106769
-              Y: 0.0
-              Z: 0.0
-            LocalPosition:
-              X: 0.0
-              Y: 0.0
-              Z: -0.846873045
-            LocalScale:
-              X: 1.27999997
-              Y: 1.0
-              Z: 0.720000029
-          - !Evergine.Components.Graphics3D.MaterialComponent,Evergine.Framework
-            Id: 599fb181-208e-4e18-8924-3a93ec19066c
-            AsignedTo: Default
-            IsEnabled: true
-            Material: 3c423d0b-a827-444e-b1f2-5a1165da97d3
-            UseCopy: false
-          - !Evergine.Components.Graphics3D.PlaneMesh,Evergine.Components
-            Id: 7d726a6b-048b-4c8d-add3-52f2d0f0f876
-            Height: 1.0
-            IsEnabled: true
-            Origin:
-              X: 0.5
-              Y: 0.5
-            PlaneNormal: YPositive
-            TwoSides: false
-            UMirror: false
-            UOffset: 0.0
-            UTile: 1.0
-            VMirror: false
-            VOffset: 0.0
-            VTile: 1.0
-            Width: 1.0
-          - !Evergine.Components.Graphics3D.MeshRenderer,Evergine.Framework
-            Id: c0c29659-cafd-4bd6-8130-a14da4cbb036
-            DebugBoundingbox: true
-            IsCullingEnabled: true
-            IsEnabled: true
-            OrderBias: 0
-            RenderFlags: CastShadows
-          - !VideoToTexture.Components.VideoPlayer,VideoToTexture
-            Id: 73749d04-10bb-43d5-ba22-5d68fe9c737c
-            Autoplay: true
-            HWDevice: NONE
-            IsEnabled: true
-            Loop: true
-            UpdateOrder: 0.5
-            VideoPath: Videos\occean.wmv
-          - !VideoToTexture.Components.InputBehavior,VideoToTexture
-            Id: 3daee5b6-6e73-4aff-8deb-a495493a80e2
-            IsEnabled: true
-            UpdateOrder: 0.5
-        Children: []
-        Id: e5a9db83-7bfa-4fc2-a645-4ec8a10ebb9d
+    Children: []
     Id: 9841b6b3-9c09-4b60-b442-a5c63257ee02
   - !Evergine.Framework.Assets.AssetSources.Entities.EntityItemModel,Evergine.Framework
     Name: SunLight
@@ -349,6 +284,132 @@ Items:
         RenderFlags: CastShadows
     Children: []
     Id: db28d88e-fccf-42c6-ae01-3e8b07ba2e9d
+  - !Evergine.Framework.Assets.AssetSources.Entities.EntityItemModel,Evergine.Framework
+    Name: screen1
+    Tag: Screen
+    IsEnabled: true
+    IsStatic: false
+    Components:
+      - !Evergine.Framework.Graphics.Transform3D,Evergine.Framework
+        Id: 76c12723-bcd8-43f8-a644-6af76b7f33ff
+        IsEnabled: true
+        LocalOrientation:
+          W: 0.707106769
+          X: 0.707106769
+          Y: 0.0
+          Z: 0.0
+        LocalPosition:
+          X: -1.12934458
+          Y: 0.924812615
+          Z: 1.15312696
+        LocalScale:
+          X: 1.27999997
+          Y: 1.0
+          Z: 0.720000029
+      - !Evergine.Components.Graphics3D.MaterialComponent,Evergine.Framework
+        Id: 599fb181-208e-4e18-8924-3a93ec19066c
+        AsignedTo: Default
+        IsEnabled: true
+        Material: 3c423d0b-a827-444e-b1f2-5a1165da97d3
+        UseCopy: false
+      - !Evergine.Components.Graphics3D.PlaneMesh,Evergine.Components
+        Id: 7d726a6b-048b-4c8d-add3-52f2d0f0f876
+        Height: 1.0
+        IsEnabled: true
+        Origin:
+          X: 0.5
+          Y: 0.5
+        PlaneNormal: YPositive
+        TwoSides: false
+        UMirror: false
+        UOffset: 0.0
+        UTile: 1.0
+        VMirror: false
+        VOffset: 0.0
+        VTile: 1.0
+        Width: 1.0
+      - !Evergine.Components.Graphics3D.MeshRenderer,Evergine.Framework
+        Id: c0c29659-cafd-4bd6-8130-a14da4cbb036
+        DebugBoundingbox: true
+        IsCullingEnabled: true
+        IsEnabled: true
+        OrderBias: 0
+        RenderFlags: CastShadows
+      - !VideoToTexture.Components.VideoPlayer,VideoToTexture
+        Id: 73749d04-10bb-43d5-ba22-5d68fe9c737c
+        Autoplay: true
+        HWDevice: DXVA2
+        IsEnabled: true
+        Loop: true
+        UpdateOrder: 0.5
+        VideoPath: Videos\confetti.mp4
+      - !VideoToTexture.Components.InputBehavior,VideoToTexture
+        Id: 3daee5b6-6e73-4aff-8deb-a495493a80e2
+        IsEnabled: true
+        UpdateOrder: 0.5
+    Children: []
+    Id: e5a9db83-7bfa-4fc2-a645-4ec8a10ebb9d
+  - !Evergine.Framework.Assets.AssetSources.Entities.EntityItemModel,Evergine.Framework
+    Name: screen2
+    Tag: Screen
+    IsEnabled: true
+    IsStatic: false
+    Components:
+      - !Evergine.Framework.Graphics.Transform3D,Evergine.Framework
+        Id: 736d2f98-8552-4101-8e10-a090e7410b57
+        IsEnabled: true
+        LocalOrientation:
+          W: 0.707106769
+          X: 0.707106769
+          Y: 0.0
+          Z: 0.0
+        LocalPosition:
+          X: 0.259271502
+          Y: 0.924812615
+          Z: 1.15312696
+        LocalScale:
+          X: 1.27999997
+          Y: 1.0
+          Z: 0.720000029
+      - !Evergine.Components.Graphics3D.MaterialComponent,Evergine.Framework
+        Id: 75e25569-56ca-40c7-86ff-53a1996dbee5
+        AsignedTo: Default
+        IsEnabled: true
+        Material: c770bf1c-80fd-404b-8d32-dfd354c337f3
+        UseCopy: false
+      - !Evergine.Components.Graphics3D.PlaneMesh,Evergine.Components
+        Id: 0f452c08-dcb9-4f6a-9c83-2e8bdcf69159
+        Height: 1.0
+        IsEnabled: true
+        Origin:
+          X: 0.5
+          Y: 0.5
+        PlaneNormal: YPositive
+        TwoSides: false
+        UMirror: false
+        UOffset: 0.0
+        UTile: 1.0
+        VMirror: false
+        VOffset: 0.0
+        VTile: 1.0
+        Width: 1.0
+      - !Evergine.Components.Graphics3D.MeshRenderer,Evergine.Framework
+        Id: 3f4d5eb3-15dc-403a-a0e6-9d248e5faa97
+        DebugBoundingbox: true
+        IsCullingEnabled: true
+        IsEnabled: true
+        OrderBias: 0
+        RenderFlags: CastShadows
+      - !VideoToTexture.Components.VideoPlayer,VideoToTexture
+        Id: dc48be94-c617-4b36-8446-ee8c7a738266
+        Autoplay: true
+        HWDevice: NONE
+        IsEnabled: true
+        Loop: true
+        UpdateOrder: 0.5
+        VideoPath: Videos\occean.wmv
+    Children: []
+    Id: 2ce03492-ec93-492f-a93d-be297e70a324
 Managers:
   - !Evergine.Framework.Managers.AssetSceneManager,Evergine.Framework
     Id: 4ae9964a-5a8a-463f-b714-050389b3b68c

@@ -1,9 +1,7 @@
 ﻿using FFmpeg.AutoGen;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace VideoToTexture.FFmpeg
 {
@@ -87,25 +85,6 @@ namespace VideoToTexture.FFmpeg
         public static unsafe string AnsiToString(byte* ptr)
         {
             return Marshal.PtrToStringAnsi(new IntPtr(ptr)) ?? "";
-        }
-
-        // PGM File Viewer (browser-based)
-        // ; https://smallpond.ca/jim/photomicrography/pgmViewer/index.html
-        public static unsafe void pgm_save(byte* buf, int wrap, int xsize, int ysize, string filename)
-        {
-            using FileStream fs = new FileStream(filename, FileMode.Create);
-
-            byte[] header = Encoding.ASCII.GetBytes($"P5\n{xsize} {ysize}\n255\n");
-            fs.Write(header);
-
-            // https://www.sysnet.pe.kr/2/0/12913
-            for (int i = 0; i < ysize; i++)
-            {
-                byte* ptr = buf + (i * wrap);
-                ReadOnlySpan<byte> pos = new Span<byte>(ptr, xsize);
-
-                fs.Write(pos);
-            }
         }
 
         public static void PrintHwDevices()

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace VideoToTexture.FFmpeg;
 
-public sealed unsafe class VideoStreamDecoder : IDisposable
+public unsafe class VideoStreamDecoder : IDisposable
 {
     private readonly AVCodecContext* _pCodecContext;
     private readonly AVFormatContext* _pFormatContext;

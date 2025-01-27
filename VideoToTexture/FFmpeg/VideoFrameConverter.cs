@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace VideoToTexture.FFmpeg
 {
-    public sealed unsafe class VideoFrameConverter : IDisposable
+    public unsafe class VideoFrameConverter : IDisposable
     {
         private readonly IntPtr _convertedFrameBufferPtr;
         private readonly Size _destinationSize;
