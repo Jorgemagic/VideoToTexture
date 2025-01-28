@@ -1,4 +1,4 @@
-﻿using FFmpeg.AutoGen;
+﻿using FFmpeg.AutoGen.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -78,7 +78,10 @@ public unsafe class VideoStreamDecoder : IDisposable
         var pPacket = _pPacket;
         ffmpeg.av_packet_free(&pPacket);
 
-        ffmpeg.avcodec_close(_pCodecContext);
+        ////ffmpeg.avcodec_close(_pCodecContext);
+        var pCodecContext = _pCodecContext;
+        ffmpeg.avcodec_free_context(&pCodecContext);
+
         var pFormatContext = _pFormatContext;
         ffmpeg.avformat_close_input(&pFormatContext);
     }

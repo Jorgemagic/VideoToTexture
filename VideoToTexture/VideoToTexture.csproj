@@ -13,8 +13,8 @@
 		<PackageReference Include="Evergine.Mathematics" Version="2024.10.24.1957" />
 		<PackageReference Include="Evergine.Bullet" Version="2024.10.24.1957" />
 		<PackageReference Include="Evergine.Targets" Version="2024.10.24.1957" />
-		<PackageReference Include="Evergine.CodeScenes" Version="2024.10.24.1957" />
-		<PackageReference Include="FFmpeg.AutoGen" Version="5.0.0" />
+		<PackageReference Include="Evergine.CodeScenes" Version="2024.10.24.1957" />		
+		<PackageReference Include="FFmpeg.AutoGen.Bindings.DynamicallyLoaded" Version="7.0.0" />
 		<PackageReference Include="SkiaSharp" Version="2.88.6" />
 	</ItemGroup>
 </Project>

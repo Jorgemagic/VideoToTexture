@@ -1,6 +1,5 @@
-﻿using FFmpeg.AutoGen;
+﻿using FFmpeg.AutoGen.Bindings.DynamicallyLoaded;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -14,23 +13,10 @@ namespace VideoToTexture.FFmpeg
             {
                 var current = Environment.CurrentDirectory;
                 var probe = Path.Combine("FFmpeg", "bin", Environment.Is64BitProcess ? "x64" : "x86");
-
-                while (current != null)
-                {
-                    var ffmpegBinaryPath = Path.Combine(current, probe);
-
-                    if (Directory.Exists(ffmpegBinaryPath))
-                    {
-                        Debug.WriteLine($"FFmpeg binaries found in: {ffmpegBinaryPath}");
-                        ffmpeg.RootPath = ffmpegBinaryPath;
-                        return;
-                    }
-
-                    current = Directory.GetParent(current)?.FullName;
-                }
+                DynamicallyLoadedBindings.LibrariesPath = Path.Combine(current, probe);               
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                ffmpeg.RootPath = "/lib/x86_64-linux-gnu/";
+                DynamicallyLoadedBindings.LibrariesPath = "/lib/x86_64-linux-gnu/";
             else
                 throw new NotSupportedException(); // fell free add support for platform of your choose
         }

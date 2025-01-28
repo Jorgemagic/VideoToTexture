@@ -2,7 +2,8 @@
 using Evergine.Components.Graphics3D;
 using Evergine.Framework;
 using Evergine.Framework.Graphics.Materials;
-using FFmpeg.AutoGen;
+using FFmpeg.AutoGen.Abstractions;
+using FFmpeg.AutoGen.Bindings.DynamicallyLoaded;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -136,10 +137,12 @@ namespace VideoToTexture.Components
             if (!Application.Current.IsEditor)
             {                                                
                 // FFMPEG
-                FFmpegBinariesHelper.RegisterFFmpegBinaries();
-
                 Debug.WriteLine("Current directory: " + Environment.CurrentDirectory);
                 Debug.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
+
+                FFmpegBinariesHelper.RegisterFFmpegBinaries();
+                DynamicallyLoadedBindings.Initialize();
+
                 Debug.WriteLine($"FFmpeg version info: {ffmpeg.av_version_info()}");
                 Debug.WriteLine($"LIBAVFORMAT Version: {ffmpeg.LIBAVFORMAT_VERSION_MAJOR}.{ffmpeg.LIBAVFORMAT_VERSION_MINOR}");
             }
