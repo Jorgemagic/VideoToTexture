@@ -5,13 +5,6 @@ using System.Runtime.InteropServices;
 
 namespace VideoToTexture.FFmpeg
 {
-    public enum AV_BUFFERSRC_FLAG
-    {
-        NO_CHECK_FORMAT = 1,
-        PUSH = 4,
-        KEEP_REF = 8,
-    }
-
     internal static class FFmpegHelper
     {
         public static AVRational AV_TIME_BASE_Q
@@ -41,7 +34,7 @@ namespace VideoToTexture.FFmpeg
 
         public static unsafe double av_q2d(AVRational* ar)
         {
-            return (ar->num / (double)ar->den);
+            return ar->num / (double)ar->den;
         }
 
         public static unsafe string av_ts2timestr(long pts, in AVRational av)
@@ -52,7 +45,7 @@ namespace VideoToTexture.FFmpeg
             }
         }
 
-        public static unsafe string av_ts2timestr(long pts, AVRational *av)
+        public static unsafe string av_ts2timestr(long pts, AVRational* av)
         {
             if (pts == 0)
             {
@@ -73,18 +66,22 @@ namespace VideoToTexture.FFmpeg
             var buffer = stackalloc byte[bufferSize];
             ffmpeg.av_strerror(error, buffer, (ulong)bufferSize);
             var message = Marshal.PtrToStringAnsi((IntPtr)buffer);
-            return message ?? "";
+            return message ?? string.Empty;
         }
 
         public static int ThrowExceptionIfError(this int error)
         {
-            if (error < 0) throw new ApplicationException(av_strerror(error));
+            if (error < 0)
+            {
+                throw new ApplicationException(av_strerror(error));
+            }
+
             return error;
         }
 
         public static unsafe string AnsiToString(byte* ptr)
         {
-            return Marshal.PtrToStringAnsi(new IntPtr(ptr)) ?? "";
+            return Marshal.PtrToStringAnsi(new IntPtr(ptr)) ?? string.Empty;
         }
 
         public static void PrintHwDevices()
@@ -111,12 +108,11 @@ namespace VideoToTexture.FFmpeg
                     break;
                 }
 
-                Debug.WriteLine($"{FFmpegHelper.AnsiToString(cur->name)}({FFmpegHelper.AnsiToString(cur->long_name)})");
+                Debug.WriteLine($"{AnsiToString(cur->name)}({AnsiToString(cur->long_name)})");
 
                 AVCodecHWConfig* config = null;
                 for (int n = 0; (config = ffmpeg.avcodec_get_hw_config(cur, n)) != null; n++)
                 {
-
                     if ((config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX) == AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX)
                     {
                         Debug.WriteLine($"\thw-accel: {config->pix_fmt}, type: {config->device_type}, decoder: {ffmpeg.av_codec_is_decoder(cur)}, encoder: {ffmpeg.av_codec_is_encoder(cur)}");
@@ -127,13 +123,13 @@ namespace VideoToTexture.FFmpeg
 
         public static int get_format_from_sample_fmt(out string fmt, AVSampleFormat sample_fmt)
         {
-            fmt = "";
+            fmt = string.Empty;
 
             foreach (var item in sample_fmt_entry.entries)
             {
                 if (item.sample_fmt == sample_fmt)
                 {
-                    fmt = (BitConverter.IsLittleEndian) ? item.fmt_le : item.fmt_be;
+                    fmt = BitConverter.IsLittleEndian ? item.fmt_le : item.fmt_be;
                     return 0;
                 }
             }
@@ -144,8 +140,8 @@ namespace VideoToTexture.FFmpeg
         public class sample_fmt_entry
         {
             public AVSampleFormat sample_fmt;
-            public string fmt_be = "";
-            public string fmt_le = "";
+            public string fmt_be = string.Empty;
+            public string fmt_le = string.Empty;
 
             public static sample_fmt_entry[] entries = new sample_fmt_entry[]
             {
@@ -156,6 +152,5 @@ namespace VideoToTexture.FFmpeg
             new sample_fmt_entry { sample_fmt = AVSampleFormat.AV_SAMPLE_FMT_DBL, fmt_be = "f64be", fmt_le = "f64le" },
             };
         }
-
     }
 }

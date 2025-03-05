@@ -1,4 +1,6 @@
-﻿using Evergine.Common.Graphics;
+﻿using Evergine.Common.Attributes;
+using Evergine.Common.Graphics;
+using Evergine.Common.IO;
 using Evergine.Components.Graphics3D;
 using Evergine.Framework;
 using Evergine.Framework.Graphics.Materials;
@@ -12,30 +14,98 @@ using VideoToTexture.FFmpeg;
 
 namespace VideoToTexture.Components
 {
+    /// <summary>
+    /// Handles video playback and streaming, converting video frames into textures for rendering.
+    /// </summary>
     public class VideoPlayer : Behavior
     {
+        /// <summary>
+        /// Occurs when the video begins playing.
+        /// </summary>
+        public event EventHandler Playing;
+
+        /// <summary>
+        /// Occurs when the video is paused.
+        /// </summary>
+        public event EventHandler Paused;
+
+        /// <summary>
+        /// Occurs when the video stops playing.
+        /// </summary>
+        public event EventHandler Stopped;
+
+        /// <summary>
+        /// Defines supported hardware acceleration device types.
+        /// </summary>
         public enum DeviceType
         {
+            /// <summary> No hardware acceleration. </summary>
             NONE,
+
+            /// <summary> VDPAU (Video Decode and Presentation API for Unix). </summary>
             VDPAU,
+
+            /// <summary> NVIDIA CUDA hardware acceleration. </summary>
             CUDA,
+
+            /// <summary> VA-API (Video Acceleration API) for Linux systems. </summary>
             VAAPI,
+
+            /// <summary> DXVA2 (DirectX Video Acceleration 2) for Windows. </summary>
             DXVA2,
+
+            /// <summary> Intel Quick Sync Video. </summary>
             QSV,
+
+            /// <summary> VideoToolbox hardware acceleration for macOS. </summary>
             VIDEOTOOLBOX,
+
+            /// <summary> D3D11VA (Direct3D 11 Video Acceleration). </summary>
             D3D11VA,
+
+            /// <summary> DRM (Direct Rendering Manager) for Linux. </summary>
             DRM,
+
+            /// <summary> OpenCL hardware acceleration. </summary>
             OPENCL,
+
+            /// <summary> Android MediaCodec hardware acceleration. </summary>
             MEDIACODEC,
-            VULKAN
+
+            /// <summary> Vulkan-based video acceleration. </summary>
+            VULKAN,
+        }
+
+        /// <summary>
+        /// Specifies the different playback states of a video.
+        /// </summary>
+        public enum VideoStateType
+        {
+            /// <summary> The video is not currently playing. </summary>
+            Stopped,
+
+            /// <summary> The video is actively playing. </summary>
+            Playing,
+
+            /// <summary> The video playback is temporarily halted. </summary>
+            Paused,
         }
 
         [BindService]
         private GraphicsContext graphicsContext = null;
 
-        [BindComponent]
         private MaterialComponent materialComponent = null;
 
+        [BindService]
+        private AssetsDirectory assetsDirectory = null;
+
+        private Texture videoTexture = null;
+
+        private string videoPath;
+
+        /// <summary>
+        /// Gets or sets the hardware device type used for video decoding.
+        /// </summary>
         public DeviceType HWDevice
         {
             get
@@ -63,10 +133,10 @@ namespace VideoToTexture.Components
                     case AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC:
                         return DeviceType.MEDIACODEC;
                     case AVHWDeviceType.AV_HWDEVICE_TYPE_VULKAN:
-                        return DeviceType.VULKAN;   
+                        return DeviceType.VULKAN;
                     case AVHWDeviceType.AV_HWDEVICE_TYPE_NONE:
                     default:
-                        return DeviceType.NONE;                        
+                        return DeviceType.NONE;
                 }
             }
 
@@ -109,33 +179,81 @@ namespace VideoToTexture.Components
                         break;
                     case DeviceType.VULKAN:
                         this.hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_VULKAN;
-                        break;                    
+                        break;
                 }
             }
         }
-        public string VideoPath { get; set; }
 
+        /// <summary>
+        /// Gets or sets the path to the video file.
+        /// </summary>
+        public string VideoPath
+        {
+            get => this.videoPath;
+            set
+            {
+                this.videoPath = value;
+                this.playing = false;
+                this.frameNumber = 0;
+                this.VideoState = VideoStateType.Stopped;
+
+                this.videoStreamDecoder?.Dispose();
+                this.videoStreamDecoder = null;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the video should autoplay on initialization.
+        /// </summary>
         public bool Autoplay { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the video should loop when reaching the end.
+        /// </summary>
         public bool Loop { get; set; }
 
-        private Texture screenTexture;
+        /// <summary>
+        /// Gets the videoplayer state.
+        /// </summary>
+        [IgnoreEvergine]
+        [DontRenderProperty]
+        public VideoStateType VideoState { get; private set; }
+
+        /// <summary>
+        /// Gets Video width in pixels.
+        /// </summary>
+        [IgnoreEvergine]
+        [DontRenderProperty]
+        public int VideoWidth { get; private set; }
+
+        /// <summary>
+        /// Gets Video height in pixels.
+        /// </summary>
+        [IgnoreEvergine]
+        [DontRenderProperty]
+        public int VideoHeight { get; private set; }
+
+        /// <summary>
+        /// Gets the video texture generated.
+        /// </summary>
+        public Texture VideoTexture { get => this.videoTexture; }
 
         private AVHWDeviceType hwDevice = AVHWDeviceType.AV_HWDEVICE_TYPE_DXVA2;
         private VideoStreamDecoder videoStreamDecoder;
-        private VideoFrameConverter videoFrameConverter;        
+        private VideoFrameConverter videoFrameConverter;
         private int frameNumber;
         private TimeSpan elapsedTime = TimeSpan.Zero;
         private TimeSpan targetInterval;
 
         private bool playing = false;
 
+        /// <inheritdoc/>
         protected override bool OnAttached()
         {
             var result = base.OnAttached();
 
             if (!Application.Current.IsEditor)
-            {                                                
+            {
                 // FFMPEG
                 Debug.WriteLine("Current directory: " + Environment.CurrentDirectory);
                 Debug.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
@@ -147,18 +265,23 @@ namespace VideoToTexture.Components
                 Debug.WriteLine($"LIBAVFORMAT Version: {ffmpeg.LIBAVFORMAT_VERSION_MAJOR}.{ffmpeg.LIBAVFORMAT_VERSION_MINOR}");
             }
 
+            this.materialComponent = this.Owner.FindComponent<MaterialComponent>();
+
             this.playing = this.Autoplay;
+
+            this.VideoState = VideoStateType.Stopped;
 
             return result;
         }
 
+        /// <inheritdoc/>
         protected unsafe override void Update(TimeSpan gameTime)
         {
             if (this.playing)
             {
                 if (this.videoStreamDecoder == null)
                 {
-                    string filePath = Path.Combine(Environment.CurrentDirectory, "Content", this.VideoPath);
+                    string filePath = Path.Combine(this.assetsDirectory.RootPath, this.VideoPath);
                     this.videoStreamDecoder = new VideoStreamDecoder(filePath, this.hwDevice);
 
                     Debug.WriteLine($"codec name: {this.videoStreamDecoder.CodecName}");
@@ -166,7 +289,9 @@ namespace VideoToTexture.Components
                     var info = this.videoStreamDecoder.GetContextInfo();
                     info.ToList().ForEach(x => Debug.WriteLine($"{x.Key} = {x.Value}"));
 
-                    StandardMaterial material = new StandardMaterial(this.materialComponent.Material);
+                    this.VideoWidth = this.videoStreamDecoder.FrameSize.Width;
+                    this.VideoHeight = this.videoStreamDecoder.FrameSize.Height;
+
                     var textureDesc = new TextureDescription()
                     {
                         Type = TextureType.Texture2D,
@@ -179,11 +304,16 @@ namespace VideoToTexture.Components
                         CpuAccess = ResourceCpuAccess.None,
                         Flags = TextureFlags.ShaderResource,
                         Format = PixelFormat.R8G8B8A8_UNorm,
-                        MipLevels = (uint)1,
+                        MipLevels = 1,
                         SampleCount = TextureSampleCount.None,
                     };
-                    this.screenTexture = graphicsContext.Factory.CreateTexture(ref textureDesc);
-                    material.BaseColorTexture = this.screenTexture;
+                    this.videoTexture = this.graphicsContext.Factory.CreateTexture(ref textureDesc);
+
+                    if (this.materialComponent != null)
+                    {
+                        StandardMaterial material = new StandardMaterial(this.materialComponent.Material);
+                        material.BaseColorTexture = this.videoTexture;
+                    }
 
                     var sourceSize = this.videoStreamDecoder.FrameSize;
                     var sourcePixelFormat = this.hwDevice == AVHWDeviceType.AV_HWDEVICE_TYPE_NONE
@@ -198,13 +328,13 @@ namespace VideoToTexture.Components
                     this.targetInterval = TimeSpan.FromSeconds(1.0f / fps);
                 }
 
-                elapsedTime += gameTime;
+                this.elapsedTime += gameTime;
 
-                if (elapsedTime >= targetInterval)
-                {               
-                    while(elapsedTime >= targetInterval)
+                if (this.elapsedTime >= this.targetInterval)
+                {
+                    while (this.elapsedTime >= this.targetInterval)
                     {
-                        elapsedTime-= targetInterval;
+                        this.elapsedTime -= this.targetInterval;
                     }
 
                     if (this.videoStreamDecoder.TryDecodeNextFrame(out var frame, this.Loop))
@@ -212,8 +342,9 @@ namespace VideoToTexture.Components
                         this.frameNumber++;
                         var convertedFrame = this.videoFrameConverter.Convert(frame);
 
-                        this.graphicsContext.UpdateTextureData(this.screenTexture,
-                                                               (nint)convertedFrame.data[0],
+                        this.graphicsContext.UpdateTextureData(
+                                                               this.videoTexture,
+                                                               (IntPtr)convertedFrame.data[0],
                                                                (uint)(convertedFrame.width * convertedFrame.height * 4),
                                                                0);
                     }
@@ -221,26 +352,44 @@ namespace VideoToTexture.Components
             }
         }
 
-        public void Play(bool loop = false)
+        /// <summary>
+        /// Starts video playback.
+        /// </summary>
+        public void Play()
         {
             this.playing = true;
-            this.Loop = loop;
+            this.VideoState = VideoStateType.Playing;
+            this.Playing?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Stops video playback and resets the decoder.
+        /// </summary>
         public void Stop()
         {
             if (this.playing)
             {
                 this.playing = false;
+                this.frameNumber = 0;
                 this.videoStreamDecoder.Reset();
+                this.VideoState = VideoStateType.Stopped;
+                this.Stopped?.Invoke(this, EventArgs.Empty);
             }
         }
 
+        /// <summary>
+        /// Pauses video playback.
+        /// </summary>
         public void Pause()
         {
             this.playing = false;
+            this.VideoState = VideoStateType.Paused;
+            this.Paused?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Initializes the video decoder and sets up the texture for rendering.
+        /// </summary>
         private AVPixelFormat GetHWPixelFormat(AVHWDeviceType hWDevice)
         {
             return hWDevice switch
