@@ -335,24 +335,24 @@ Items:
         IsEnabled: true
         OrderBias: 0
         RenderFlags: CastShadows
+      - !VideoToTexture.Components.InputBehavior,VideoToTexture
+        Id: 3daee5b6-6e73-4aff-8deb-a495493a80e2
+        IsEnabled: true
+        UpdateOrder: 0.5
       - !VideoToTexture.Components.VideoPlayer,VideoToTexture
-        Id: 73749d04-10bb-43d5-ba22-5d68fe9c737c
+        Id: b7ed3971-ed0a-4dfd-813a-55f8bafedeaa
         Autoplay: true
         HWDevice: DXVA2
         IsEnabled: true
         Loop: true
         UpdateOrder: 0.5
         VideoPath: Videos\confetti.mp4
-      - !VideoToTexture.Components.InputBehavior,VideoToTexture
-        Id: 3daee5b6-6e73-4aff-8deb-a495493a80e2
-        IsEnabled: true
-        UpdateOrder: 0.5
     Children: []
     Id: e5a9db83-7bfa-4fc2-a645-4ec8a10ebb9d
   - !Evergine.Framework.Assets.AssetSources.Entities.EntityItemModel,Evergine.Framework
     Name: screen2
     Tag: Screen
-    IsEnabled: true
+    IsEnabled: false
     IsStatic: false
     Components:
       - !Evergine.Framework.Graphics.Transform3D,Evergine.Framework

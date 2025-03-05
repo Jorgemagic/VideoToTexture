@@ -25,10 +25,10 @@ namespace VideoToTexture.FFmpeg
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Determine the current working directory
-                var executionPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                var executionPath = Environment.CurrentDirectory;
 
                 // Construct the FFmpeg binaries path based on the process architecture
-                var probe = Path.Combine("runtimes", "win-x64", "native");
+                var probe = Path.Combine("FFmpeg", "bin", "x64");
 
                 // Assign the dynamically constructed path to the FFmpeg library loader
                 DynamicallyLoadedBindings.LibrariesPath = Path.Combine(executionPath, probe);

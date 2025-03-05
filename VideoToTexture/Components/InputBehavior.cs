@@ -3,6 +3,7 @@ using Evergine.Common.Input.Keyboard;
 using Evergine.Framework;
 using Evergine.Framework.Services;
 using System;
+using System.Diagnostics;
 
 namespace VideoToTexture.Components
 {
@@ -30,6 +31,12 @@ namespace VideoToTexture.Components
             {
                 this.videoPlayer.Stop();
             }
+            else if (keyboardDispatcher.ReadKeyState(Keys.N) == ButtonState.Pressed)
+            {
+                this.videoPlayer.VideoPath = "Videos/fireworks.mp4";                
+            }
+
+            Debug.WriteLine($"W:{this.videoPlayer.VideoWidth} H: {this.videoPlayer.VideoHeight}");
         }
     }
 }

@@ -193,12 +193,13 @@ namespace VideoToTexture.Components
             set
             {
                 this.videoPath = value;
-                this.playing = false;
                 this.frameNumber = 0;
-                this.VideoState = VideoStateType.Stopped;
 
                 this.videoStreamDecoder?.Dispose();
                 this.videoStreamDecoder = null;
+
+                this.playing = this.Autoplay;
+                this.VideoState = this.playing ? VideoStateType.Playing : VideoStateType.Stopped;
             }
         }
 
